@@ -17,6 +17,27 @@ FRAME_FOLDER = "FRAMES"
 RAW_DATA_FOLDER = "DATA"
 
 
+def main():
+    download_tiktok_audio(video_url, output_filename)
+    video_audio, video_language = transcript_audio_to_text(audio_filename)
+    download_and_get_tiktok_metadata(video_url, output_metadata_filename)
+    video_title, video_description = extract_metadata(output_metadata_filename)
+    extract_video_frames(video_title)
+    reader = create_reader(video_language)
+    video_frame_text = extract_text_from_frames(reader, frame_folder=FRAME_FOLDER)
+    input_text = generate_input_text(video_description, video_audio, video_frame_text)
+    places = forecast_places(input_text)
+    print(" ")
+    print("="*50)
+    print(" ")
+    print(f"input text from video : {input_text}")
+    print(" ")
+    print("="*50)
+    print(" ")
+    print(f"Places forecasted : {places}")
+    os.remove(video_title)
+
+
 def download_tiktok_audio(video_url, output_filename):
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -30,6 +51,7 @@ def download_tiktok_audio(video_url, output_filename):
 
     with yt.YoutubeDL(ydl_opts) as ydl:
         ydl.download([video_url])
+
 
 def transcript_audio_to_text(audio_filename):
 
@@ -93,21 +115,7 @@ def forecast_places(input_generated_texts):
     print("forecasted places :", forecasted_places)
     return forecasted_places
 
-def main():
-    download_tiktok_audio(video_url, output_filename)
-    video_audio, video_language = transcript_audio_to_text(audio_filename)
-    download_and_get_tiktok_metadata(video_url, output_metadata_filename)
-    video_title, video_description = extract_metadata(output_metadata_filename)
-    extract_video_frames(video_title)
-    reader = create_reader(video_language)
-    video_frame_text = extract_text_from_frames(reader, frame_folder=FRAME_FOLDER)
-    input_text = generate_input_text(video_description, video_audio, video_frame_text)
-    places = forecast_places(input_text)
-    print("="*50)
-    print(f"input text from video : {input_text}")
-    print("="*50)
-    print(f"Places forecasted : {places}")
-    os.remove(video_title)
+
 
 
 if __name__ == "__main__":
@@ -120,7 +128,7 @@ if __name__ == "__main__":
     pd.set_option('display.max_colwidth', None)
 
 
-    video_url = "https://www.tiktok.com/@arnebeckmann/video/7061276364040670469?q=berlin&t=1727902781177"  
+    video_url = "https://www.tiktok.com/@michellekatzd/video/6986224560949464326?q=caf%C3%A9%20%C3%A0%20paris&t=1727969717273"  
     output_filename = f"{RAW_DATA_FOLDER}/audio"
     audio_filename = f"{RAW_DATA_FOLDER}/audio.mp3"
     output_metadata_filename=f"{RAW_DATA_FOLDER}/video_metadata.csv"
