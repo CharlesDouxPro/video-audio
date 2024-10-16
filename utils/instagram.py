@@ -1,33 +1,17 @@
 import requests
 import os
-import os
-import requests
-import base64
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
-import time
-import os
-import requests
 import base64
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-import time
 from moviepy.editor import *
 import pandas as pd
 import whisper
-import os
-import requests
-import base64
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-import time
 import ffmpeg
 import easyocr
 import re
 from openai import OpenAI
+from utils.utils import upload_raw_to_supabase
 
 
 
@@ -78,7 +62,7 @@ def download_instagram_post(post_url, RAW_DATA_FOLDER):
         video_url = media_data['video_url']
         video_title = os.path.join(RAW_DATA_FOLDER, f"{shortcode}.mp4")
         download_file(video_url, video_title)
-        video_time = convert_video_to_audio(video_title)
+        video_time = convert_video_to_audio(video_title,RAW_DATA_FOLDER)
     else:
         if 'edge_sidecar_to_children' in media_data:
             for edge in media_data['edge_sidecar_to_children']['edges']:
@@ -221,12 +205,12 @@ def nlp_forecast(client, text):
     print(output)
     return output
 
-def forecast_instagram_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client):
-    video_description, video_time, video_title = download_instagram_post(video_url)
+def forecast_instagram_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase):
+    video_description, video_time, video_title = download_instagram_post(video_url, RAW_DATA_FOLDER)
     print(video_title)
     video_audio = transcript_audio_to_text(f"{RAW_DATA_FOLDER}/audio.mp3", False)
     print(f"video time : {video_time} seconds")
-    extract_video_frames(video_title, video_time)
+    extract_video_frames(video_title, video_time, FRAME_FOLDER)
     reader = create_reader()
     video_frame_text = extract_text_from_frames(reader, frame_folder=FRAME_FOLDER, video_time=video_time)
     input_text = generate_input_text(video_description, video_audio, video_frame_text)
@@ -238,4 +222,6 @@ def forecast_instagram_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_clie
     dico = eval(output)
     data = pd.DataFrame(dico, index=[0])
     print(data.head())
+    upload_raw_to_supabase(video_url, video_description, video_frame_text, video_audio, new, data, supabase, int(data["place_number"]))
+
     return data

@@ -13,7 +13,7 @@ from openai import OpenAI
 from ShazamAPI import Shazam
 from langdetect import detect, DetectorFactory
 import re
-
+from utils.utils import upload_raw_to_supabase
 
 def download_tiktok_audio(video_url, output_filename):
     ydl_opts = {
@@ -207,7 +207,7 @@ def preprocess_text(text):
     return cleaned_text
 
 
-def forecast_tiktok_places(video_url,RAW_DATA_FOLDER, FRAME_FOLDER,gpt_client ):
+def forecast_tiktok_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase):
     download_tiktok_audio(video_url, f"{RAW_DATA_FOLDER}/audio")
     is_music = check_audio(f"{RAW_DATA_FOLDER}/audio.mp3")
     video_audio = transcript_audio_to_text(f"{RAW_DATA_FOLDER}/audio.mp3", is_music)
@@ -215,7 +215,7 @@ def forecast_tiktok_places(video_url,RAW_DATA_FOLDER, FRAME_FOLDER,gpt_client ):
     video_title, video_description, video_time = extract_metadata(f"{RAW_DATA_FOLDER}/video_metadata.csv")
     print(f"video time : {video_time} seconds")
     download_video(video_url, f"{RAW_DATA_FOLDER}/video_metadata.csv", video_time)
-    extract_video_frames(video_title, video_time)
+    extract_video_frames(video_title, video_time,FRAME_FOLDER)
     reader = create_reader()
     video_frame_text = extract_text_from_frames(reader, frame_folder=FRAME_FOLDER, video_time=video_time)
     input_text = generate_input_text(video_description, video_audio, video_frame_text)
@@ -227,5 +227,9 @@ def forecast_tiktok_places(video_url,RAW_DATA_FOLDER, FRAME_FOLDER,gpt_client ):
     dico = eval(output)
     data = pd.DataFrame(dico, index=[0])
     print(data.head())
+    upload_raw_to_supabase(video_url, video_description, video_frame_text, video_audio, new, data, supabase, int(data["place_number"]))
     return data
+
+
+
 
