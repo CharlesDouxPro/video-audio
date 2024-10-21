@@ -1,13 +1,16 @@
-# Utiliser l'image Python 3.12.5 slim
 FROM python:3.12-slim
 
-# Définir le répertoire de travail
 WORKDIR /app
 
-# Copier le fichier des exigences et installer les dépendances
 COPY requirements.txt ./
 
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD [ "uvicorn",
 
 # Installe les dépendances système nécessaires
 RUN apt-get update && apt-get install -y \

@@ -9,13 +9,11 @@ from pydantic import BaseModel
 import pandas as pd
 
 
-# Instanciation de l'application FastAPI
 app = FastAPI()
 
 class VideoRequest(BaseModel):
     video_url: str
 
-# Initialisation des répertoires et des clés API
 RAW_DATA_FOLDER = "DATA"
 FRAME_FOLDER = "FRAMES"
 os.makedirs(FRAME_FOLDER, exist_ok=True)
