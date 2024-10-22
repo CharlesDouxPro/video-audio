@@ -8,8 +8,17 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
 
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Autoriser toutes les origines
+    allow_credentials=True,
+    allow_methods=["*"],  # Autoriser toutes les méthodes HTTP (GET, POST, etc.)
+    allow_headers=["*"],  # Autoriser tous les en-têtes
+)
 
 class VideoRequest(BaseModel):
     video_url: str
