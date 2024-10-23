@@ -1,32 +1,41 @@
-# Utiliser l'image python:3.12-slim comme base
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1
+
+# Utilisation de Python 3.12 slim comme base
+ARG PYTHON_VERSION=3.12.6
+FROM python:${PYTHON_VERSION}-slim as base
+
+# Empêche Python d'écrire des fichiers pyc
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Garde les flux stdout/stderr non bufferisés
+ENV PYTHONUNBUFFERED=1
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier requirements.txt avant d'installer les dépendances
-COPY requirements.txt .
-
-# Mettre à jour les paquets et installer les dépendances système nécessaires
+# Met à jour apt-get et installe les dépendances système nécessaires
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     make \
+    ffmpeg \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Installer les dépendances Python à partir de requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Installer les dépendances Python
+RUN --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=bind,source=requirements.txt,target=requirements.txt \
+    python -m pip install -r requirements.txt
 
 # Installer spaCy et télécharger le modèle linguistique
-RUN pip install --no-cache-dir spacy && \
+RUN pip install spacy && \
     python -m spacy download xx_ent_wiki_sm
 
 # Copier le reste des fichiers de l'application
 COPY . .
 
-# Exposer le port sur lequel l'application sera exécutée
+# Exposer le port 8000
 EXPOSE 8000
 
-# Définir la commande pour démarrer l'application
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Commande pour démarrer l'application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

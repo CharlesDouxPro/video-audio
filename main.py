@@ -1,4 +1,5 @@
 import os
+from os import environ as env
 import shutil
 from utils.instagram import *
 from utils.tiktok import *
@@ -12,14 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Autoriser toutes les origines
-    allow_credentials=True,
-    allow_methods=["*"],  # Autoriser toutes les méthodes HTTP (GET, POST, etc.)
-    allow_headers=["*"],  # Autoriser tous les en-têtes
-)
-
 class VideoRequest(BaseModel):
     video_url: str
 
@@ -29,13 +22,13 @@ os.makedirs(FRAME_FOLDER, exist_ok=True)
 os.makedirs(RAW_DATA_FOLDER, exist_ok=True)
 
 pd.set_option('display.max_colwidth', None)
-OPENAI_API_KEY = "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"
-gpt_client = OpenAI(api_key=OPENAI_API_KEY)
+gpt_client = OpenAI(api_key=env["OPENAI_API_KEY"])
 
-url: str = "https://pqhcubzkrlbvljbvsmem.supabase.co"
-key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxaGN1YnprcmxidmxqYnZzbWVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc4NzgyNDYsImV4cCI6MjA0MzQ1NDI0Nn0.5Yt2zMMm09II29COY58lXIvIQID1N7FM6JL3-B9jhdU"
-supabase: Client = create_client(url, key)
+supabase: Client = create_client(env["SUPABASE_URL"], env["SUPABASE_KEY"])
 
+@app.get("/")
+def index():
+    return {"details": "hello world!"}
 
 @app.post("/process_video/")
 def process_video(request: VideoRequest):
@@ -54,13 +47,16 @@ def process_video(request: VideoRequest):
             formated_places = create_formated_places(places, nplace)
             referenced_dataframe = get_place_details(formated_places, len(formated_places)) 
             upload_to_supabase(referenced_dataframe, video_url, supabase, places)
+            shutil.rmtree(FRAME_FOLDER)
+            shutil.rmtree(RAW_DATA_FOLDER)
             return {"status": "success", "message": "Video processed", "data": referenced_dataframe.head().to_json()}
         else:
+            shutil.rmtree(FRAME_FOLDER)
+            shutil.rmtree(RAW_DATA_FOLDER)
             return {"status": "exists", "message": "Video URL already exists", "data": referenced_dataframe.to_json()}
     else:
+        shutil.rmtree(FRAME_FOLDER)
+        shutil.rmtree(RAW_DATA_FOLDER)
         return {"status": "error", "message": "URL is not valid, are you sure this is an Instagram post or TikTok video?"}
 
-@app.on_event("shutdown")
-def clean_up():
-    shutil.rmtree(FRAME_FOLDER)
-    shutil.rmtree(RAW_DATA_FOLDER)
+
