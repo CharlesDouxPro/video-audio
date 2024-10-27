@@ -49,11 +49,11 @@ def process_video(request: VideoRequest):
             upload_to_supabase(referenced_dataframe, video_url, supabase, places)
             shutil.rmtree(FRAME_FOLDER)
             shutil.rmtree(RAW_DATA_FOLDER)
-            return {"status": "success", "message": "Video processed", "data": referenced_dataframe.head().to_json()}
+            return {"status": "success", "message": "Video processed", "data": referenced_dataframe.head().to_dict()}
         else:
             shutil.rmtree(FRAME_FOLDER)
             shutil.rmtree(RAW_DATA_FOLDER)
-            return {"status": "exists", "message": "Video URL already exists", "data": referenced_dataframe.to_json()}
+            return {"status": "exists", "message": "Video URL already exists", "data": referenced_dataframe.to_dict()}
     else:
         shutil.rmtree(FRAME_FOLDER)
         shutil.rmtree(RAW_DATA_FOLDER)
