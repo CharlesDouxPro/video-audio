@@ -12,6 +12,7 @@ env:
   ECS_CLUSTER: ${{vars.ECS_CLUSTER}}
   ECS_SERVICE: ${{vars.ECS_BACKEND_SERVICE}}
   
+  
 jobs:
   deploy:
     name: Build, Push and Deploy to ECS
