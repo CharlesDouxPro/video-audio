@@ -20,12 +20,12 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Installer les dépendances Python
+# Copier et installer les dépendances Python
+COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
-# Installer spaCy et télécharger le modèle linguistique (optimisé pour le cache)
+# Installer spaCy et télécharger le modèle linguistique
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install spacy && \
     python -m spacy download xx_ent_wiki_sm
@@ -34,7 +34,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY . .
 
 # Exposer le port et le rendre configurable
-EXPOSE ${PORT:-8000}
+EXPOSE 8000
 
-# Commande pour démarrer l'application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENV PORT=8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+
