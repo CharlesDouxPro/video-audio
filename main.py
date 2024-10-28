@@ -14,10 +14,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-OPENAI_ACCESS_KEY = get_secret_value('openai-access-key')
-SUPABASE_ACCESS_KEY = get_secret_value('supabase-access-key')
-SUPABASE_URL = get_secret_value('supabase-url')
-print(OPENAI_ACCESS_KEY.get('OPENAI_API_KEY'))
+OPENAI_ACCESS_KEY = get_secret_value('openai-access-key').get('OPENAI_API_KEY')
+SUPABASE_ACCESS_KEY = get_secret_value('supabase-access-key').get('SUPABASE_ACCESS_KEY')
+SUPABASE_URL = get_secret_value('supabase-url').get('SUPABASE_URL')
+
 class VideoRequest(BaseModel):
     video_url: str
 
