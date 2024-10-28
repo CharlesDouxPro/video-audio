@@ -4,6 +4,9 @@ import requests
 import numpy as np
 import boto3
 import json
+import os
+import shutil
+import glob
 
 
 def get_secret_value(key_name):
@@ -153,3 +156,17 @@ def url_exist(video_url, supabase):
         print("L'URL n'existe pas dans la base de données.")
     print(f"taille du df :" + str(len(data)))
     return data
+
+
+def clean_and_make_dir(path):
+    if os.path.exists(path) and os.path.isdir(path):
+        shutil.rmtree(path)
+    os.makedirs(path, exist_ok=True)
+
+
+
+def clean_mp4_files(folder_path):
+    mp4_files = glob.glob(os.path.join(folder_path, "*.mp4"))
+    
+    for file_path in mp4_files:
+        os.remove(file_path)

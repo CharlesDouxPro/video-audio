@@ -12,19 +12,21 @@ from botocore.exceptions import ClientError
 
 from fastapi.middleware.cors import CORSMiddleware
 
+RAW_DATA_FOLDER = "DATA"
+FRAME_FOLDER = "FRAMES"
+
+clean_and_make_dir(RAW_DATA_FOLDER)
+clean_and_make_dir(FRAME_FOLDER)
+clean_mp4_files("./")
 app = FastAPI()
 
 OPENAI_ACCESS_KEY = get_secret_value('openai-access-key').get('OPENAI_API_KEY')
-SUPABASE_ACCESS_KEY = get_secret_value('supabase-access-key').get('SUPABASE_ACCESS_KEY')
+SUPABASE_ACCESS_KEY = get_secret_value('supabase-access-key').get('SUPABASE_KEY')
 SUPABASE_URL = get_secret_value('supabase-url').get('SUPABASE_URL')
 
 class VideoRequest(BaseModel):
     video_url: str
 
-RAW_DATA_FOLDER = "DATA"
-FRAME_FOLDER = "FRAMES"
-os.makedirs(FRAME_FOLDER, exist_ok=True)
-os.makedirs(RAW_DATA_FOLDER, exist_ok=True)
 
 pd.set_option('display.max_colwidth', None)
 gpt_client = OpenAI(api_key=OPENAI_ACCESS_KEY)
@@ -47,25 +49,18 @@ def process_video(request: VideoRequest):
                 places = forecast_tiktok_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase)
             elif platform == "instagram":
                 places = forecast_instagram_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase)
-
             nplace = int(places["place_number"])
             formated_places = create_formated_places(places, nplace)
             referenced_dataframe = get_place_details(formated_places, len(formated_places)) 
             upload_to_supabase(referenced_dataframe, video_url, supabase, places)
-            shutil.rmtree(FRAME_FOLDER)
-            shutil.rmtree(RAW_DATA_FOLDER)
             formatted_data = referenced_dataframe.to_dict(orient="records")
             print(formatted_data)
             return {"status": "success", "message": "Video processed", "data": formatted_data}
         else:
-            shutil.rmtree(FRAME_FOLDER)
-            shutil.rmtree(RAW_DATA_FOLDER)
             formatted_data = referenced_dataframe.to_dict(orient="records")
             print(formatted_data)
             return {"status": "exists", "message": "Video URL already exists", "data": formatted_data}
     else:
-        shutil.rmtree(FRAME_FOLDER)
-        shutil.rmtree(RAW_DATA_FOLDER)
         return {"status": "error", "message": "URL is not valid, are you sure this is an Instagram post or TikTok video?"}
 
 
