@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 
-# Utilisation de Python 3.12 slim comme base, spécifiant arm64
+# Utilisation de Python 3.12 slim comme base
 ARG PYTHON_VERSION=3.12.6
-FROM --platform=linux/arm64 python:${PYTHON_VERSION}-slim AS base
+FROM python:${PYTHON_VERSION}-slim AS base
 
 # Empêche Python d'écrire des fichiers pyc
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -37,4 +37,4 @@ COPY . .
 EXPOSE ${PORT:-8000}
 
 # Commande pour démarrer l'application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT:-8000}"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
