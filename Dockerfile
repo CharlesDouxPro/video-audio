@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 
-# Utilisation de Python 3.12 slim comme base
+# Utilisation de Python 3.12 slim comme base, spécifiant arm64
 ARG PYTHON_VERSION=3.12.6
-FROM python:${PYTHON_VERSION}-slim AS base
+FROM --platform=linux/arm64 python:${PYTHON_VERSION}-slim AS base
 
 # Empêche Python d'écrire des fichiers pyc
 ENV PYTHONDONTWRITEBYTECODE=1
