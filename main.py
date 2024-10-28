@@ -8,11 +8,16 @@ from supabase import create_client, Client
 from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
+from botocore.exceptions import ClientError
 
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+OPENAI_ACCESS_KEY = get_secret_value('openai-access-key')
+SUPABASE_ACCESS_KEY = get_secret_value('supabase-access-key')
+SUPABASE_URL = get_secret_value('supabase-url')
+print(OPENAI_ACCESS_KEY.get('OPENAI_API_KEY'))
 class VideoRequest(BaseModel):
     video_url: str
 
@@ -22,9 +27,9 @@ os.makedirs(FRAME_FOLDER, exist_ok=True)
 os.makedirs(RAW_DATA_FOLDER, exist_ok=True)
 
 pd.set_option('display.max_colwidth', None)
-gpt_client = OpenAI(api_key=env["OPENAI_API_KEY"])
+gpt_client = OpenAI(api_key=OPENAI_ACCESS_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_ACCESS_KEY)
 
-supabase: Client = create_client(env["SUPABASE_URL"], env["SUPABASE_KEY"])
 
 @app.get("/")
 def index():
@@ -49,11 +54,15 @@ def process_video(request: VideoRequest):
             upload_to_supabase(referenced_dataframe, video_url, supabase, places)
             shutil.rmtree(FRAME_FOLDER)
             shutil.rmtree(RAW_DATA_FOLDER)
-            return {"status": "success", "message": "Video processed", "data": referenced_dataframe.head().to_dict()}
+            formatted_data = referenced_dataframe.to_dict(orient="records")
+            print(formatted_data)
+            return {"status": "success", "message": "Video processed", "data": formatted_data}
         else:
             shutil.rmtree(FRAME_FOLDER)
             shutil.rmtree(RAW_DATA_FOLDER)
-            return {"status": "exists", "message": "Video URL already exists", "data": referenced_dataframe.to_dict()}
+            formatted_data = referenced_dataframe.to_dict(orient="records")
+            print(formatted_data)
+            return {"status": "exists", "message": "Video URL already exists", "data": formatted_data}
     else:
         shutil.rmtree(FRAME_FOLDER)
         shutil.rmtree(RAW_DATA_FOLDER)

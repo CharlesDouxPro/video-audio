@@ -2,6 +2,18 @@ import re
 import pandas as pd
 import requests
 import numpy as np
+import boto3
+import json
+
+
+def get_secret_value(key_name):
+    client = boto3.client('secretsmanager', region_name='eu-west-3')
+
+    secret_key = f"spotit-prod-{key_name}"
+    response = client.get_secret_value(SecretId=secret_key)
+    secret_dict = json.loads(response['SecretString'])
+
+    return secret_dict
 
 def tiktok_or_instagram(url):
     if "tiktok.com" in url :
@@ -12,7 +24,6 @@ def tiktok_or_instagram(url):
         return " "
     
 def is_valid_url(url):
-    # Expression régulière pour vérifier que le domaine est bien TikTok ou Instagram
     pattern = r"(https?://)?(www\.)?(tiktok\.com|instagram\.com)/.*"
     if re.match(pattern, url):
         return True
