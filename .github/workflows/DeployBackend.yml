@@ -1,5 +1,6 @@
 name: CI/CD for FastAPI on ECS
 
+
 on:
   push:
     branches:
