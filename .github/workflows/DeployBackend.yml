@@ -12,6 +12,7 @@ env:
   CONTAINER_NAME: ${{ vars.ECR_CONTAINER_NAME }}
   ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
   ECS_SERVICE: ${{ vars.ECS_BACKEND_SERVICE }}
+  ECS_TASK_DEFINITION : ${{ vars.ECS_TASK_DEFINITION }}
   
 jobs:
   deploy:
@@ -47,7 +48,10 @@ jobs:
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
+          task-definition : ${{ env.ECS_TASK_DEFINITION}}
           cluster: ${{ env.ECS_CLUSTER }}
           service: ${{ env.ECS_SERVICE }}
           image: $IMAGE_URI
           container-name: ${{ env.CONTAINER_NAME }}
+          wait-for-service-stability: true
+
