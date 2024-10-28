@@ -36,8 +36,9 @@ jobs:
       - name: Build and Tag Docker Image
         run: |
           IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest"
-          docker build -t $IMAGE_URI .
+          docker build -t "$IMAGE_URI" .
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
 
       - name: Push Docker Image to ECR
         run: |
