@@ -40,7 +40,6 @@ jobs:
           docker build -t "$IMAGE_URI" .
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-
       - name: Push Docker Image to ECR
         run: |
           docker push $IMAGE_URI
