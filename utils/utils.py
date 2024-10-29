@@ -59,6 +59,10 @@ def get_place_details(place_name: list, nplace: int):
             types = details.get('types')
             user_rating = details.get('user_ratings_total')
             rating = details.get('rating')
+            photos = [photo.get('photo_reference') for photo in details.get('photos', [])]
+            maps_url = details.get('url')
+
+
             
             current_informations = {
                 "Name": name,
@@ -66,7 +70,9 @@ def get_place_details(place_name: list, nplace: int):
                 "HTML_address" : html_adress,
                 "Types": types,
                 "Rating_count": user_rating,
-                "Rate": rating
+                "Rate": rating,
+                "Pictures" : photos,
+                "Maps_url" : maps_url
             }
             
             place_informations_list.append(current_informations)
@@ -76,6 +82,8 @@ def get_place_details(place_name: list, nplace: int):
             print(f"Types_{n}:", types)
             print(f"User ratings total_{n}:", user_rating)
             print(f"Rating_{n}:", rating)
+            print(f"Maps_url_{n}:", maps_url)
+            print(f"Pictures_{n}:", photos)
             print(""" 
                   
                   -------- 
@@ -114,6 +122,8 @@ def upload_to_supabase(referenced_dataframe, video_url, supabase, data):
                 "place_rate" : float(referenced_dataframe["Rate"][n]),
                 "place_city" : data["city"][0],
                 "place_country" : data["country"][0],
+                "place_pictures" : referenced_dataframe["Pictures"][n],
+                "place_map_url" : referenced_dataframe["Maps_url"][n]
                 })
             .execute()
         )
