@@ -9,9 +9,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
 from botocore.exceptions import ClientError
-
+from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-
 RAW_DATA_FOLDER = "DATA"
 FRAME_FOLDER = "FRAMES"
 
@@ -40,7 +39,7 @@ def index():
 @app.post("/process_video/")
 def process_video(request: VideoRequest):
     video_url = request.video_url
-
+    start = datetime.now()
     if is_valid_url(video_url):
         referenced_dataframe = url_exist(video_url, supabase)
         if referenced_dataframe.empty:
@@ -54,13 +53,15 @@ def process_video(request: VideoRequest):
             referenced_dataframe = get_place_details(formated_places, len(formated_places)) 
             upload_to_supabase(referenced_dataframe, video_url, supabase, places)
             formatted_data = referenced_dataframe.to_dict(orient="records")
-            print(formatted_data)
+            end = datetime.now()
+            print("status", "success",'in', end, 'seconds')
             return {"status": "success", "message": "Video processed", "data": formatted_data}
         else:
             formatted_data = referenced_dataframe.to_dict(orient="records")
-            print(formatted_data)
+            print("status", "exists")
             return {"status": "exists", "message": "Video URL already exists", "data": formatted_data}
     else:
+        print("status error")
         return {"status": "error", "message": "URL is not valid, are you sure this is an Instagram post or TikTok video?"}
 
 
