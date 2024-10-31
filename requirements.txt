@@ -34,7 +34,6 @@ frozenlist==1.4.1
 fsspec==2024.9.0
 future==1.0.0
 gotrue==2.9.1
-gradio_client==0.2.7
 greenlet==3.0.3
 h11==0.14.0
 h2==4.1.0
@@ -63,6 +62,7 @@ lz4==4.3.3
 marisa-trie==1.2.0
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
+matplotlib==3.9.2
 mdurl==0.1.2
 more-itertools==10.5.0
 moviepy==1.0.3
@@ -104,6 +104,9 @@ requests==2.32.3
 rich==13.9.1
 s3transfer==0.10.2
 safetensors==0.4.5
+scikit-image==0.24.0
+scipy==1.14.1
+seaborn==0.13.2
 selenium==4.25.0
 setuptools==75.1.0
 shapely==2.0.6
