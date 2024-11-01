@@ -39,48 +39,61 @@ def get_post_description(post_url):
     return description
 
 def convert_video_to_audio(filepath,RAW_DATA_FOLDER ):
-    video = VideoFileClip(filepath)
-    video.audio.write_audiofile(f"{RAW_DATA_FOLDER}/audio.mp3")
-    video_time = video.duration
-    return video_time
+    try:
+        video = VideoFileClip(filepath)
+        video.audio.write_audiofile(f"{RAW_DATA_FOLDER}/audio.mp3")
+        video_time = video.duration
+        print('video tiùme' , video_time)
+        return video_time
+    except Exception:
+        return 0
+
 
 def download_instagram_post(post_url, RAW_DATA_FOLDER):
     shortcode = post_url.split("/")[-2]
+    print(shortcode)
     description = get_post_description(post_url)
     api_url = f"https://www.instagram.com/p/{shortcode}/?__a=1&__d=dis"
+    print(api_url)
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
     }
-    response = requests.get(api_url, headers=headers)
     
-    if response.status_code != 200:
-        print("Impossible to fetch post data.")
-        return
-
-    media_data = response.json()['graphql']['shortcode_media']
-    if media_data['is_video']:
-        video_url = media_data['video_url']
-        video_title = os.path.join(RAW_DATA_FOLDER, f"{shortcode}.mp4")
-        download_file(video_url, video_title)
-        video_time = convert_video_to_audio(video_title,RAW_DATA_FOLDER)
-    else:
-        if 'edge_sidecar_to_children' in media_data:
-            for edge in media_data['edge_sidecar_to_children']['edges']:
-                node = edge['node']
-                if node['is_video']:
-                    video_url = node['video_url']
-                    video_title = os.path.join(RAW_DATA_FOLDER, f"{node['id']}.mp4")
-                    download_file(video_url, video_title)
-                    video_time = convert_video_to_audio(video_title)
-                else:
-                    image_url = node['display_url']
-                    video_title = os.path.join(RAW_DATA_FOLDER, f"{node['id']}.jpg")
-                    download_file(image_url, video_title)
+    response = requests.get(api_url, headers=headers)
+    video_time, video_title = None, None  # Initialisation par défaut
+    try:
+        media_data = response.json()['graphql']['shortcode_media']
+        if media_data['is_video']:
+            print('in a video')
+            video_url = media_data['video_url']
+            video_title = os.path.join(RAW_DATA_FOLDER, f"{shortcode}.mp4")
+            download_file(video_url, video_title)
+            video_time = convert_video_to_audio(video_title, RAW_DATA_FOLDER)
         else:
-            image_url = media_data['display_url']
-            video_title = os.path.join(RAW_DATA_FOLDER, f"{shortcode}.jpg")
-            download_file(image_url, video_title)
-    return description, video_time, video_title
+            if 'edge_sidecar_to_children' in media_data:
+                print('carrousel')
+                for edge in media_data['edge_sidecar_to_children']['edges']:
+                    node = edge['node']
+                    if node['is_video']:
+                        video_url = node['video_url']
+                        video_title = os.path.join(RAW_DATA_FOLDER, f"{node['id']}.mp4")
+                        download_file(video_url, video_title)
+                        video_time = convert_video_to_audio(video_title, RAW_DATA_FOLDER)
+                    else:
+                        image_url = node['display_url']
+                        video_title = os.path.join(RAW_DATA_FOLDER, f"{node['id']}.jpg")
+                        download_file(image_url, video_title)
+            else:
+                print('no carrousel')
+                image_url = media_data['display_url']
+                video_title = os.path.join(RAW_DATA_FOLDER, f"{shortcode}.jpg")
+                download_file(image_url, video_title)
+                
+        return description, video_time, video_title
+    except Exception as e:
+        print('ERROR DUE TO : ', str(e))
+        return None, None, None 
+
 
 def transcript_audio_to_text(audio_filename, is_music):
     if is_music is False : 
@@ -91,37 +104,29 @@ def transcript_audio_to_text(audio_filename, is_music):
     else:
         return ""
     
-def extract_video_frames(video_title , video_time,FRAME_FOLDER, fps = 1):
-    if video_time > 150:
-        print("Video too long, no video extraction")
-        return 
-    else:
-        output_frames = f'{FRAME_FOLDER}/frame_%04d.png'
-        (
-            ffmpeg
-            .input(video_title)
-            .output(output_frames, vf=f'fps={fps}')
-            .run()
-        )
-        print("Frames extraction done.")
+def extract_video_frames(video_title ,FRAME_FOLDER, fps = 1):
+    output_frames = f'{FRAME_FOLDER}/frame_%04d.png'
+    (
+        ffmpeg
+        .input(video_title)
+        .output(output_frames, vf=f'fps={fps}')
+        .run()
+    )
+    print("Frames extraction done.")
 
 def create_reader():
     reader = easyocr.Reader(['en','fr','es','it','de'])
     return reader
 
 
-def extract_text_from_frames(reader, frame_folder, video_time):
-    if video_time > 150 : 
-        print("no frame extraction")
-        return " "
-    else:
-        video_frame_text = []
-        for frame in os.listdir(frame_folder):
-            result = reader.readtext(f"{frame_folder}/{frame}")
-            for detection in result:
-                video_frame_text.append(detection[1])
-        print( video_frame_text)
-        return video_frame_text
+def extract_text_from_frames(reader, frame_folder):
+    video_frame_text = []
+    for frame in os.listdir(frame_folder):
+        result = reader.readtext(f"{frame_folder}/{frame}")
+        for detection in result:
+            video_frame_text.append(detection[1])
+    print( video_frame_text)
+    return video_frame_text
 
 
 def generate_input_text(video_description, video_audio, video_frame_text):
@@ -207,11 +212,14 @@ def nlp_forecast(client, text):
 def forecast_instagram_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase):
     video_description, video_time, video_title = download_instagram_post(video_url, RAW_DATA_FOLDER)
     print(video_title)
-    video_audio = transcript_audio_to_text(f"{RAW_DATA_FOLDER}/audio.mp3", False)
+    try:
+        video_audio = transcript_audio_to_text(f"{RAW_DATA_FOLDER}/audio.mp3", False)
+    except Exception as e:
+        video_audio = None
     print(f"video time : {video_time} seconds")
-    extract_video_frames(video_title, video_time, FRAME_FOLDER)
+    extract_video_frames(video_title, FRAME_FOLDER)
     reader = create_reader()
-    video_frame_text = extract_text_from_frames(reader, frame_folder=FRAME_FOLDER, video_time=video_time)
+    video_frame_text = extract_text_from_frames(reader, frame_folder=FRAME_FOLDER)
     input_text = generate_input_text(video_description, video_audio, video_frame_text)
     cleaned_text = clean_text(str(input_text))
     new = remove_duplicates(cleaned_text)
