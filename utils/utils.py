@@ -180,3 +180,9 @@ def clean_mp4_files(folder_path):
     
     for file_path in mp4_files:
         os.remove(file_path)
+
+
+def clean_all(data_folder, frame_folder, video_path):
+    clean_and_make_dir(data_folder)
+    clean_and_make_dir(frame_folder)
+    clean_mp4_files(video_path)
