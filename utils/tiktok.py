@@ -34,7 +34,6 @@ def transcript_audio_to_text(audio_filename, is_music):
         model = whisper.load_model("base")
         result = model.transcribe(audio_filename)
         text = result["text"]
-        print(f"text : {result["text"]}")
 
 
         return text
