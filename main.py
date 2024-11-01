@@ -18,6 +18,8 @@ FRAME_FOLDER = "FRAMES"
 
 app = FastAPI()
 
+clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
+
 OPENAI_ACCESS_KEY = get_secret_value('openai-access-key').get('OPENAI_API_KEY')
 SUPABASE_ACCESS_KEY = get_secret_value('supabase-access-key').get('SUPABASE_KEY')
 SUPABASE_URL = get_secret_value('supabase-url').get('SUPABASE_URL')
