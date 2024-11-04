@@ -130,8 +130,7 @@ def upload_to_supabase(referenced_dataframe, video_url, supabase, data):
                 "place_country" : data["country"][0],
                 "place_pictures" : referenced_dataframe["Pictures"][n],
                 "place_map_url" : referenced_dataframe["Maps_url"][n],
-                'place_lat' : referenced_dataframe['Latitude'][n],
-                'place_lon' : referenced_dataframe['Longitude'][n],
+                'place_lat_lon' : [referenced_dataframe['Latitude'][n],referenced_dataframe['Longitude'][n]],
                 })
             .execute()
         )
