@@ -61,6 +61,10 @@ def get_place_details(place_name: list, nplace: int):
             rating = details.get('rating')
             photos = [photo.get('photo_reference') for photo in details.get('photos', [])]
             maps_url = details.get('url')
+            geometry = details.get('geometry', {})
+            location = geometry.get('location', {})
+            place_lon = location.get('lng')
+            place_lat = location.get('lat')
 
 
             
@@ -72,7 +76,9 @@ def get_place_details(place_name: list, nplace: int):
                 "Rating_count": user_rating,
                 "Rate": rating,
                 "Pictures" : photos,
-                "Maps_url" : maps_url
+                "Maps_url" : maps_url,
+                'Longitude' : place_lon,
+                'Latitude' : place_lat
             }
             
             place_informations_list.append(current_informations)
@@ -123,7 +129,9 @@ def upload_to_supabase(referenced_dataframe, video_url, supabase, data):
                 "place_city" : data["city"][0],
                 "place_country" : data["country"][0],
                 "place_pictures" : referenced_dataframe["Pictures"][n],
-                "place_map_url" : referenced_dataframe["Maps_url"][n]
+                "place_map_url" : referenced_dataframe["Maps_url"][n],
+                'place_lat' : referenced_dataframe['Latitude'][n],
+                'place_lon' : referenced_dataframe['Longitude'][n],
                 })
             .execute()
         )
