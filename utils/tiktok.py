@@ -163,6 +163,7 @@ def nlp_forecast(client, text):
                 - Do not return the same place multiple time
                 - Return only in the python dictionary format like below
                 - Do not include any additional formatting, such as markdown code blocks
+                - If you find various cities, juste write Various cities in the city field
 
             {
             "place_number" : "<number of places>",

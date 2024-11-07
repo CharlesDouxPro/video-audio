@@ -27,7 +27,7 @@ def tiktok_or_instagram(url):
         return "web"
     
 def is_valid_url(url):
-    pattern = r"(https?://)?(www\.)?(tiktok\.com|instagram\.com)/.*"
+    pattern = r"(https?://)?(www\.)/.*"
     if re.match(pattern, url):
         return True
     else:
@@ -53,6 +53,12 @@ def encoded_types(types):
         elif type is ['art_gallery']:
             type = 'art gallery'
     return types
+
+def get_pictures(details, API_KEY):
+    photos = [build_photo_url(photo.get('photo_reference'), API_KEY) for photo in details.get('photos', [])]
+    if len(photos) == 0:
+        photos = ['https://pqhcubzkrlbvljbvsmem.supabase.co/storage/v1/object/public/assets/noImageAvailable.png?t=2024-11-07T11%3A10%3A54.812Z']
+    return photos
 
 def get_place_details(place_name: list, nplace: int):
     place_informations_list = []

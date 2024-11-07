@@ -43,34 +43,28 @@ def index():
 def process_video(request: VideoRequest):
     url = request.url
     start = datetime.now()
-    if is_valid_url(url):
-        referenced_dataframe = url_exist(url, supabase)
-        if referenced_dataframe.empty:
-            platform = tiktok_or_instagram(url)
-            if platform == "tiktok":
-                places = forecast_tiktok_places(url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase)
-            elif platform == "instagram":
-                places = forecast_instagram_places(url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase)
-            elif platform == "web":
-                places = forecast_web_places(url, gpt_client)
-            nplace = int(places["place_number"])
-            formated_places = create_formated_places(places, nplace)
-            referenced_dataframe = get_place_details(formated_places, len(formated_places)) 
-            upload_to_supabase(referenced_dataframe, url, supabase, places)
-            formatted_data = referenced_dataframe.to_dict(orient="records")
-            end = datetime.now()
-            time = end - start
-            print("status", "success",'in', time, 'seconds')
-            clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
-            return {"status": "success", "message": "Video processed", "data": formatted_data}
-        else:
-            formatted_data = referenced_dataframe.to_dict(orient="records")
-            print("status", "exists")
-            clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
-            return {"status": "exists", "message": "Video URL already exists", "data": formatted_data}
-    else:
-        print("status error")
+    referenced_dataframe = url_exist(url, supabase)
+    if referenced_dataframe.empty:
+        platform = tiktok_or_instagram(url)
+        if platform == "tiktok":
+            places = forecast_tiktok_places(url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase)
+        elif platform == "instagram":
+            places = forecast_instagram_places(url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase)
+        elif platform == "web":
+            places = forecast_web_places(url, gpt_client)
+        nplace = int(places["place_number"])
+        formated_places = create_formated_places(places, nplace)
+        referenced_dataframe = get_place_details(formated_places, len(formated_places)) 
+        upload_to_supabase(referenced_dataframe, url, supabase, places)
+        formatted_data = referenced_dataframe.to_dict(orient="records")
+        end = datetime.now()
+        time = end - start
+        print("status", "success",'in', time, 'seconds')
         clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
-        return {"status": "error", "message": "URL is not valid, are you sure this is an Instagram post or TikTok video?"}
-
+        return {"status": "success", "message": "Video processed", "data": formatted_data}
+    else:
+        formatted_data = referenced_dataframe.to_dict(orient="records")
+        print("status", "exists")
+        clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
+        return {"status": "exists", "message": "Video URL already exists", "data": formatted_data}
 
