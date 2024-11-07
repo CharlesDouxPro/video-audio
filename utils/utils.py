@@ -24,7 +24,7 @@ def tiktok_or_instagram(url):
     elif "instagram.com" in url:
         return "instagram"
     else:
-        return " "
+        return "web"
     
 def is_valid_url(url):
     pattern = r"(https?://)?(www\.)?(tiktok\.com|instagram\.com)/.*"
@@ -35,7 +35,24 @@ def is_valid_url(url):
     
 
 
-API_KEY = 'AIzaSyCo-rjmf08Vh4sRAXdyW1Ll92ykDTHCkE4'
+API_KEY = 'AIzaSyBknlYzovvGF-VWMFN3W7rILAPsISS8BMw'
+
+
+def build_photo_url(photo_reference, api_key, max_width=400):
+    base_url = "https://maps.googleapis.com/maps/api/place/photo"
+    return f"{base_url}?photoreference={photo_reference}&maxwidth={max_width}&key={api_key}"
+
+def encoded_types(types):
+    for type in types:
+        if type is ['colloquial_area', 'administrative_area_level_0','administrative_area_level_1','administrative_area_level_2','administrative_area_level_3','administrative_area_level_4','administrative_area_level_5','administrative_area_level','administrative_area']:
+            type = 'territory'
+        elif type is ['tourist attraction']:
+            type = 'tourist attraction'
+        elif type is ['point_of_interest']:
+            type = 'point of interest'
+        elif type is ['art_gallery']:
+            type = 'art gallery'
+    return types
 
 def get_place_details(place_name: list, nplace: int):
     place_informations_list = []
@@ -59,12 +76,14 @@ def get_place_details(place_name: list, nplace: int):
             types = details.get('types')
             user_rating = details.get('user_ratings_total')
             rating = details.get('rating')
-            photos = [photo.get('photo_reference') for photo in details.get('photos', [])]
+            photos = [build_photo_url(photo.get('photo_reference'), API_KEY) for photo in details.get('photos', [])]
             maps_url = details.get('url')
             geometry = details.get('geometry', {})
             location = geometry.get('location', {})
             place_lon = location.get('lng')
             place_lat = location.get('lat')
+            business_status = details.get('business_status')
+
 
 
             
@@ -72,13 +91,14 @@ def get_place_details(place_name: list, nplace: int):
                 "Name": name,
                 "Address": address,
                 "HTML_address" : html_adress,
-                "Types": types,
+                "Types": encoded_types(types),
                 "Rating_count": user_rating,
                 "Rate": rating,
                 "Pictures" : photos,
                 "Maps_url" : maps_url,
                 'Longitude' : place_lon,
-                'Latitude' : place_lat
+                'Latitude' : place_lat,
+                'Status' : business_status
             }
             
             place_informations_list.append(current_informations)
@@ -108,7 +128,10 @@ def get_place_details(place_name: list, nplace: int):
 def create_formated_places(data, nplaces):
     research_places = []
     for n in range(1, nplaces+1):
-        formated_adress = data[f"place_{n}"][0] +" "+ data["city"][0] +" "+ data["country"][0]
+        if data['city'][0] == 'Various cities':
+            formated_adress = data[f"place_{n}"][0] +" "+ data["country"][0]
+        else : 
+            formated_adress = data[f"place_{n}"][0] +" "+ data["city"][0] +" "+ data["country"][0]
         research_places.append(formated_adress)
     
     print(research_places)
@@ -121,16 +144,21 @@ def upload_to_supabase(referenced_dataframe, video_url, supabase, data):
             .insert({
                 "video_url": video_url,
                 "place_name" : referenced_dataframe["Name"][n],
-                "place_address" : referenced_dataframe["Address"][n],
+                "placeAddress" : referenced_dataframe["Address"][n],
                 "place_html_address" : referenced_dataframe["HTML_address"][n],
-                "place_types" : referenced_dataframe["Types"][n],
+                "placeTypes" : referenced_dataframe["Types"][n],
                 "place_rating_count" : int(referenced_dataframe["Rating_count"][n]),
                 "place_rate" : float(referenced_dataframe["Rate"][n]),
                 "place_city" : data["city"][0],
                 "place_country" : data["country"][0],
                 "place_pictures" : referenced_dataframe["Pictures"][n],
                 "place_map_url" : referenced_dataframe["Maps_url"][n],
-                'place_lat_lon' : [referenced_dataframe['Latitude'][n],referenced_dataframe['Longitude'][n]],
+                'placeLat' : referenced_dataframe['Latitude'][n],
+                'placeLon': referenced_dataframe['Longitude'][n],
+                'latitude' : referenced_dataframe['Latitude'][n],
+                'longitude': referenced_dataframe['Longitude'][n],
+                'imageUrl' : referenced_dataframe['Pictures'][n][0],
+                'title' : referenced_dataframe["Name"][n],
                 })
             .execute()
         )

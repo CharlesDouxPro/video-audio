@@ -164,7 +164,6 @@ def nlp_forecast(client, text):
                 - Return only in the python dictionary format like below
                 - Do not include any additional formatting, such as markdown code blocks
 
-
             {
             "place_number" : "<number of places>",
             "place_1" : "<first place you find in the text>",
