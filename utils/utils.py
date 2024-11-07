@@ -35,9 +35,6 @@ def is_valid_url(url):
     
 
 
-API_KEY = 'AIzaSyBknlYzovvGF-VWMFN3W7rILAPsISS8BMw'
-
-
 def build_photo_url(photo_reference, api_key, max_width=400):
     base_url = "https://maps.googleapis.com/maps/api/place/photo"
     return f"{base_url}?photoreference={photo_reference}&maxwidth={max_width}&key={api_key}"
@@ -60,7 +57,7 @@ def get_pictures(details, API_KEY):
         photos = ['https://pqhcubzkrlbvljbvsmem.supabase.co/storage/v1/object/public/assets/noImageAvailable.png?t=2024-11-07T11%3A10%3A54.812Z']
     return photos
 
-def get_place_details(place_name: list, nplace: int):
+def get_place_details(place_name: list, nplace: int, API_KEY: str):
     place_informations_list = []
     print(nplace)
     for n in range(nplace):

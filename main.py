@@ -24,6 +24,7 @@ clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
 OPENAI_ACCESS_KEY = get_secret_value('openai-access-key').get('OPENAI_API_KEY')
 SUPABASE_ACCESS_KEY = get_secret_value('supabase-access-key').get('SUPABASE_KEY')
 SUPABASE_URL = get_secret_value('supabase-url').get('SUPABASE_URL')
+GOOGLE_API_KEY = get_secret_value('google-access-key').get('GOOGLE_API_KEY')
 
 
 class VideoRequest(BaseModel):
@@ -53,15 +54,18 @@ def process_video(request: VideoRequest):
         elif platform == "web":
             places = forecast_web_places(url, gpt_client)
         nplace = int(places["place_number"])
-        formated_places = create_formated_places(places, nplace)
-        referenced_dataframe = get_place_details(formated_places, len(formated_places)) 
-        upload_to_supabase(referenced_dataframe, url, supabase, places)
-        formatted_data = referenced_dataframe.to_dict(orient="records")
-        end = datetime.now()
-        time = end - start
-        print("status", "success",'in', time, 'seconds')
-        clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
-        return {"status": "success", "message": "Video processed", "data": formatted_data}
+        if nplace == 0:
+            return {"status": "warning", "message": "No place found", "data": " "}
+        else:
+            formated_places = create_formated_places(places, nplace)
+            referenced_dataframe = get_place_details(formated_places, len(formated_places), GOOGLE_API_KEY) 
+            upload_to_supabase(referenced_dataframe, url, supabase, places)
+            formatted_data = referenced_dataframe.to_dict(orient="records")
+            end = datetime.now()
+            time = end - start
+            print("status", "success",'in', time, 'seconds')
+            clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
+            return {"status": "success", "message": "Video processed", "data": formatted_data}
     else:
         formatted_data = referenced_dataframe.to_dict(orient="records")
         print("status", "exists")
