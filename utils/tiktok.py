@@ -164,7 +164,12 @@ def nlp_forecast(client, text):
                 - Return only in the python dictionary format like below
                 - Do not include any additional formatting, such as markdown code blocks
                 - If you find various cities, juste write Various cities in the city field
-
+                - If you don't find places just return place number at 0 and city country empty like this : {
+                                                                                                                "place_number" : "0",
+                                                                                                                "city" : "",
+                                                                                                                "country" : ""
+                                                                                                            }
+        
             {
             "place_number" : "<number of places>",
             "place_1" : "<first place you find in the text>",
