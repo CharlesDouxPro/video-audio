@@ -18,9 +18,9 @@ def forecast_web_places(url,gpt_client):
     h4 = soup.findAll('h4')
     h5 = soup.findAll('h5')
     h6 = soup.findAll('h6')
+    p = soup.findAll('p')
     span = soup.findAll('span')
-    titles = [h1,h2,h3,h4,h5,h6,span]
-    print('titles : ', titles)
+    titles = [h1,h2,h3,h4,h5,h6,span,p]
 
     list_of_titles = []
     for title in titles:
