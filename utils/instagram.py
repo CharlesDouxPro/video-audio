@@ -92,7 +92,7 @@ def download_instagram_post(post_url, RAW_DATA_FOLDER):
         return description, video_time, video_title
     except Exception as e:
         print('ERROR DUE TO : ', str(e))
-        return None, None, None 
+        return "", 0, "" 
 
 
 def transcript_audio_to_text(audio_filename, is_music):

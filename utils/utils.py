@@ -49,6 +49,8 @@ def encoded_types(types):
             type = 'point of interest'
         elif type is ['art_gallery']:
             type = 'art gallery'
+        elif type is ['meal_takeaway']:
+            type = 'restaurant'
     return types
 
 def get_pictures(details, API_KEY):

@@ -47,6 +47,7 @@ def process_video(request: VideoRequest):
     referenced_dataframe = url_exist(url, supabase)
     if referenced_dataframe.empty:
         platform = tiktok_or_instagram(url)
+        print(platform)
         if platform == "tiktok":
             places = forecast_tiktok_places(url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase)
         elif platform == "instagram":

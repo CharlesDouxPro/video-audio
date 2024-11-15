@@ -25,7 +25,7 @@ def download_tiktok_audio(video_url, output_filename):
             'preferredquality': '192',
         }],
     }
-
+    print(video_url)
     with yt.YoutubeDL(ydl_opts) as ydl:
         ydl.download([video_url])
 
