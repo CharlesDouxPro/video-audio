@@ -65,6 +65,22 @@ def get_pictures(details, API_KEY):
 #     print("Sentence embeddings:\n", embeddings)
 #     return embeddings
 
+def extract_city_from_address_components(address_components):
+    city = None
+
+    for component in address_components:
+        if 'locality' in component.get('types', []):
+            city = component.get('long_name')
+            break
+
+    if not city:
+        for component in address_components:
+            if 'administrative_area_level_2' in component.get('types', []):
+                city = component.get('long_name')
+                break
+
+    return city
+
 def remove_words(text, words_to_remove):
     print(words_to_remove)
     if isinstance(words_to_remove, pd.Series):
@@ -112,7 +128,9 @@ def get_place_details(place_name: list, nplace: int, API_KEY: str, city: str):
                     location = geometry.get('location', {})
                     place_lon = location.get('lng')
                     place_lat = location.get('lat')
-                    business_status = details.get('business_status')
+                    business_status = details.get('business_status'),
+                    city = extract_city_from_address_components(details.get('address_components', []))
+
 
                     current_informations = {
                         "Name": name,
