@@ -83,10 +83,9 @@ def extract_city_from_address_components(address_components):
 
 def remove_words(text, words_to_remove):
     print(words_to_remove)
-    if isinstance(words_to_remove, pd.Series):
-        words_to_remove = words_to_remove.tolist()
     words = text.split()
     filtered_words = [word for word in words if word not in words_to_remove]
+    print(filtered_words)
     return " ".join(filtered_words)
 
 
@@ -99,6 +98,7 @@ def get_place_details(place_name: list, nplace: int, API_KEY: str, city: str):
 
         while retry_count < 3:  
             try:
+                print(place_name[n])
                 url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query={place_name[n]}&key={API_KEY}"
                 response = requests.get(url)
                 response.raise_for_status()  
@@ -129,7 +129,6 @@ def get_place_details(place_name: list, nplace: int, API_KEY: str, city: str):
                     place_lon = location.get('lng')
                     place_lat = location.get('lat')
                     business_status = details.get('business_status'),
-                    city = extract_city_from_address_components(details.get('address_components', []))
 
 
                     current_informations = {
@@ -150,7 +149,8 @@ def get_place_details(place_name: list, nplace: int, API_KEY: str, city: str):
                     break  
                 else:
                     print(f"No place found for '{place_name[n]}'. Retrying with a different query...")
-                    place_name[n] = remove_words(original_query, city)
+                    place_name[n] = remove_words(original_query, [city])
+                    print(place_name[n])
                     retry_count += 1
 
             except requests.exceptions.RequestException as e:
@@ -176,7 +176,9 @@ def create_formated_places(data, nplaces):
         research_places.append(formated_adress)
     
     print(research_places)
-    return research_places, data['city']
+    city = data['city'][0]
+    print('city :', city)
+    return research_places, city
 
 def upload_to_supabase(referenced_dataframe, video_url, supabase, data):
     for n in range(len(referenced_dataframe)):
@@ -289,7 +291,7 @@ def nlp_forecast(client, text):
                 - Do not return the same place multiple time
                 - Return only in the python dictionary format like below
                 - Do not include any additional formatting, such as markdown code blocks
-                - If you find various cities, juste write Various cities in the city field
+                - If you find various cities, juste write the most revenant city you found in the city field
                 - If you don't find places just return place number at 0 and city country empty like this : {
                                                                                                                 "place_number" : "0",
                                                                                                                 "city" : "",
