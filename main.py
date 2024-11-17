@@ -58,8 +58,8 @@ def process_video(request: VideoRequest):
         if nplace == 0:
             return {"status": "warning", "message": "No place found", "data": " "}
         else:
-            formated_places = create_formated_places(places, nplace)
-            referenced_dataframe = get_place_details(formated_places, len(formated_places), GOOGLE_API_KEY) 
+            formated_places, city = create_formated_places(places, nplace)
+            referenced_dataframe = get_place_details(formated_places, len(formated_places), GOOGLE_API_KEY, city) 
             upload_to_supabase(referenced_dataframe, url, supabase, places)
             formatted_data = referenced_dataframe.to_dict(orient="records")
             end = datetime.now()

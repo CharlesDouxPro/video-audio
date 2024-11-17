@@ -13,7 +13,7 @@ from openai import OpenAI
 from ShazamAPI import Shazam
 from langdetect import detect, DetectorFactory
 import re
-from utils.utils import upload_raw_to_supabase
+from utils.utils import *
 
 def download_tiktok_audio(video_url, output_filename):
     ydl_opts = {
@@ -136,61 +136,6 @@ def clean_text(text):
     text = re.sub(r'[^a-zA-Z0-9\s,.\'’-]', '', text) 
     return text
 
-
-def nlp_forecast(client, text): 
-    completion = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {
-      "role": "system",
-      "content": [
-        {
-          "type": "text",
-          "text": "You are usefull to seek places in a text with their city and country"
-        }
-      ]
-    },
-        {
-            "role": "user",
-            "content": (
-            """
-            Instructions:
-                - Given the text at the end, find all the places to visit quote in this text. 
-                - Take also care to the Name of the places who can be brand
-                - Return the number of places you find
-                - Return the city of these places in English
-                - Return the country of these places in English
-                - Do not return the same place multiple time
-                - Return only in the python dictionary format like below
-                - Do not include any additional formatting, such as markdown code blocks
-                - If you find various cities, juste write Various cities in the city field
-                - If you don't find places just return place number at 0 and city country empty like this : {
-                                                                                                                "place_number" : "0",
-                                                                                                                "city" : "",
-                                                                                                                "country" : ""
-                                                                                                            }
-        
-            {
-            "place_number" : "<number of places>",
-            "place_1" : "<first place you find in the text>",
-            "place_2" : "<second place you find in the text>", 
-            ...,
-            "place_n" : "<the nth place you find in the text>
-            "city" :" <the city of these places>", 
-            "country" : "<the country of these places>"
-             },
-
-             
-            The text could be bad formated but just focus to find similitude with the places you know 
-            There is the text to analyse :
-            """ + text
-            )
-        }
-    ]
-    )
-    output = completion.choices[0].message.content
-    print(output)
-    return output
 
 def remove_duplicates(text):
     words = text.split()

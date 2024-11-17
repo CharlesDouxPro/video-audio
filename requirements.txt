@@ -5,7 +5,7 @@ annotated-types==0.7.0
 anyio==4.6.0
 attrs==24.2.0
 beautifulsoup4==4.12.3
-blis==1.0.1
+blis
 boto3==1.35.32
 botocore==1.35.32
 Brotli==1.1.0
@@ -33,6 +33,7 @@ fonttools==4.54.1
 frozenlist==1.4.1
 fsspec==2024.9.0
 future==1.0.0
+gensim
 gotrue==2.9.1
 greenlet==3.0.3
 h11==0.14.0
@@ -44,8 +45,8 @@ httpx==0.27.2
 huggingface-hub==0.25.1
 hyperframe==6.0.1
 idna==3.10
-imageio==2.35.1
-imageio-ffmpeg==0.5.1
+imageio
+imageio-ffmpeg
 insta-scrape==2.1.2
 instaloader==4.13.1
 Jinja2==3.1.4
@@ -131,8 +132,8 @@ tifffile==2024.9.20
 TikTokApi==6.5.2
 tiktoken==0.7.0
 tokenizers==0.20.0
-torch==2.4.1
-torchvision==0.19.1
+torch
+torchvision
 tqdm==4.66.5
 transformers==4.45.1
 trio==0.26.2
