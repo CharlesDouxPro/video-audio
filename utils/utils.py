@@ -180,7 +180,7 @@ def upload_to_supabase(referenced_dataframe, video_url, supabase, data):
                 'placeLon': referenced_dataframe['Longitude'][n],
                 'latitude' : referenced_dataframe['Latitude'][n],
                 'longitude': referenced_dataframe['Longitude'][n],
-                'imageUrl' : (referenced_dataframe['Pictures'][n][0] if len(referenced_dataframe['Pictures'][n]) !=0 else ['https://pqhcubzkrlbvljbvsmem.supabase.co/storage/v1/object/public/assets/noImageAvailable.png?t=2024-11-07T11%3A10%3A54.812Z']),
+                'imageUrl' : (referenced_dataframe['Pictures'][n][0] if len(referenced_dataframe['Pictures'][n]) !=0 else 'https://pqhcubzkrlbvljbvsmem.supabase.co/storage/v1/object/public/assets/noImageAvailable.png?t=2024-11-07T11%3A10%3A54.812Z'),
                 'title' : referenced_dataframe["Name"][n],
                 })
             .execute()
