@@ -39,6 +39,7 @@ def build_photo_url(photo_reference, api_key, max_width=400):
     return f"{base_url}?photoreference={photo_reference}&maxwidth={max_width}&key={api_key}"
 
 def encoded_types(types):
+    new_types = []
     for type in types:
         if type is ['colloquial_area', 'administrative_area_level_0','administrative_area_level_1','administrative_area_level_2','administrative_area_level_3','administrative_area_level_4','administrative_area_level_5','administrative_area_level','administrative_area']:
             type = 'territory'
@@ -50,7 +51,9 @@ def encoded_types(types):
             type = 'art gallery'
         elif type is ['meal_takeaway']:
             type = 'restaurant'
-    return types
+        type = type.replace('_',' ')
+        new_types.append(type)
+    return new_types
 
 def get_pictures(details, API_KEY):
     photos = [build_photo_url(photo.get('photo_reference'), API_KEY) for photo in details.get('photos', [])]
