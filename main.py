@@ -66,6 +66,7 @@ def process_video(request: VideoRequest):
             time = end - start
             print("status", "success",'in', time, 'seconds')
             clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
+            print('refere')
             return {"status": "success", "message": "Video processed", "data": formatted_data}
     else:
         formatted_data = referenced_dataframe.to_dict(orient="records")

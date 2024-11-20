@@ -135,6 +135,7 @@ def get_place_details(place_name: list, nplace: int, API_KEY: str, city: str):
 
 
                     current_informations = {
+                        'Id': None,
                         "Name": name,
                         "Address": address,
                         "HTML_address": html_address,
@@ -208,7 +209,9 @@ def upload_to_supabase(referenced_dataframe, video_url, supabase, data):
                 })
             .execute()
         )
-
+        id = response.data[0]['id']
+        referenced_dataframe.loc[n, 'Id'] = int(id)
+    return referenced_dataframe
 
 
 def upload_raw_to_supabase(video_url, video_description, video_frame_text,video_audio,cleaned_text,data, supabase, nplace):
