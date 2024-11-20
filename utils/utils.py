@@ -210,7 +210,7 @@ def upload_to_supabase(referenced_dataframe, video_url, supabase, data):
             .execute()
         )
         id = response.data[0]['id']
-        referenced_dataframe.loc[n, 'Id'] = int(id)
+        referenced_dataframe.loc[n, 'id'] = int(id)
     return referenced_dataframe
 
 
