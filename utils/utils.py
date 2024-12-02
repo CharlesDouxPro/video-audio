@@ -235,6 +235,7 @@ def upload_raw_to_supabase(video_url, video_description, video_frame_text,video_
     )
 
 def url_exist(video_url, supabase):
+    print("URL utilisée :", video_url)
     response = (
         supabase.table("referenced_places")
         .select("*")
