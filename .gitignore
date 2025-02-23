@@ -4,5 +4,5 @@
 *.jpg
 *.mp4
 id_ed25519
-*.pyc
+*.pyc*
 *.env
