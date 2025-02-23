@@ -9,9 +9,6 @@ import ffmpeg
 import easyocr
 import shutil
 import os
-from openai import OpenAI
-from ShazamAPI import Shazam
-from langdetect import detect, DetectorFactory
 import re
 from utils.utils import *
 

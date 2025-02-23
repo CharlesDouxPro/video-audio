@@ -1,6 +1,4 @@
-import os
 from os import environ as env
-import shutil
 from utils.instagram import *
 from utils.tiktok import *
 from utils.utils import *
@@ -9,9 +7,9 @@ from supabase import create_client, Client
 from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
-from botocore.exceptions import ClientError
 from datetime import datetime
-from fastapi.middleware.cors import CORSMiddleware
+from openai import OpenAI
+
 
 RAW_DATA_FOLDER = "DATA"
 FRAME_FOLDER = "FRAMES"

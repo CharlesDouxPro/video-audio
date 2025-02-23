@@ -19,12 +19,9 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements.txt .
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    python -m pip install -r requirements.txt
+RUN python -m pip install -r requirements.txt
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install spacy && \
-    python -m spacy download xx_ent_wiki_sm
+RUN python -m spacy download xx_ent_wiki_sm
 
 COPY . .
 

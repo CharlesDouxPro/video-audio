@@ -3,17 +3,13 @@ import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
-import base64
-from moviepy.editor import *
+from moviepy import *
 import pandas as pd
 import whisper
 import ffmpeg
 import easyocr
 import re
-from openai import OpenAI
 from utils.utils import *
-
-
 
 
 def download_file(url, file_path):
