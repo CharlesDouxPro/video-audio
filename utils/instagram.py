@@ -1,10 +1,6 @@
 import requests
 import os
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
 from moviepy.editor import *
-import base64
 import pandas as pd
 import whisper
 import ffmpeg 
@@ -23,18 +19,6 @@ def download_file(url, file_path):
             if chunk:
                 file.write(chunk)
     print(f"Download : {file_path}")
-
-def get_post_description(post_url):
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get(post_url)
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    description = soup.find('meta', {'property': 'og:description'})['content']
-    driver.quit()
-    return description
 
 def convert_video_to_audio(filepath,RAW_DATA_FOLDER ):
     try:
@@ -57,7 +41,7 @@ def download_instagram_post(post_url, RAW_DATA_FOLDER):
     media_titles = []
     print(shortcode)
     post = instaloader.Post.from_shortcode(L.context, shortcode)
-    description = get_post_description(post_url)
+    description = post.caption
     print(description)
     if post.typename == "GraphSidecar":
         print("Carrousel détecté")
@@ -115,23 +99,13 @@ def extract_text_from_frames(reader, frame_folder):
 from collections import Counter
 
 def clean_text_list(text_list):
-    # Supprimer les éléments qui semblent être du bruit (chiffres isolés, caractères spéciaux isolés)
     filtered_words = [word for word in text_list if not re.fullmatch(r"[\W\d]+", word)]
-
-    # Normaliser les espaces et supprimer les caractères spéciaux inutiles
     cleaned_words = [re.sub(r"[^\w\sÀ-ÿ']", "", word).strip() for word in filtered_words]
-
-    # Suppression des chaînes vides ou trop courtes (ex: "o", "F", etc.)
     cleaned_words = [word for word in cleaned_words if len(word) > 2]
-
-    # Correction des mots mal segmentés
     corrected_text = " ".join(cleaned_words)
-
-    # Suppression des répétitions excessives
     words = corrected_text.split()
     word_counts = Counter(words)
-    final_text = " ".join([word for word in words if word_counts[word] < 3])  # Supprime les doublons excessifs
-
+    final_text = " ".join([word for word in words if word_counts[word] < 3])
     return final_text
 
 def generate_input_text(video_description, video_audio, video_frame_text):
@@ -184,7 +158,6 @@ def preprocess_text(text):
 
 def forecast_instagram_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase):
     video_description, video_time, media_title, is_video = download_instagram_post(video_url, RAW_DATA_FOLDER)
-    print(f"DEBUG - media_title: {media_title}")
     try:
         video_audio = transcript_audio_to_text(media_title[0], False)
     except Exception:

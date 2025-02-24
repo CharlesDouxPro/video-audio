@@ -2,12 +2,10 @@ import yt_dlp as yt
 import whisper
 import pyktok as pyk
 import pandas as pd
-import boto3
 import spacy
 import os
 import ffmpeg
 import easyocr
-import shutil
 import os
 import re
 from utils.utils import *
