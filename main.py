@@ -40,6 +40,7 @@ def index():
 
 @app.post("/process_video/")
 def process_video(request: VideoRequest):
+    clean_all(RAW_DATA_FOLDER, FRAME_FOLDER, './')
     url = request.url
     start = datetime.now()
     referenced_dataframe = url_exist(url, supabase)
