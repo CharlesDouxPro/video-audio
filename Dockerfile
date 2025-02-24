@@ -2,14 +2,10 @@
 ARG PYTHON_VERSION=3.12.6
 FROM python:${PYTHON_VERSION}-slim AS base
 
-# Éviter l'écriture de fichiers pyc et activer l'affichage en temps réel des logs Python
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
 
 # Définition du dossier de travail
 WORKDIR /workspace
 
-# Installation des dépendances système
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -21,24 +17,10 @@ RUN apt-get update && apt-get install -y \
     unzip \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
-
-# Installation de Google Chrome
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
-
-# Installation de ChromeDriver
-ARG CHROME_DRIVER_VERSION=133.0.6943.126
-RUN wget -q "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip" -O chromedriver.zip && \
-    unzip chromedriver.zip && \
-    mv chromedriver /usr/local/bin/ && \
-    chmod +x /usr/local/bin/chromedriver && \
-    rm chromedriver.zip
-
-# Vérification des installations
-RUN google-chrome --version && chromedriver --version
+    
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt-get install ./google-chrome-stable_current_amd64.deb
+RUN sudo apt-get install -y libnss3 libatk-bridge2.0-0 libgbm-dev libx11-xcb1 libasound2
 
 # Copie des dépendances Python et installation
 COPY requirements.txt .
