@@ -2,11 +2,11 @@ import yt_dlp as yt
 import whisper
 import pyktok as pyk
 import pandas as pd
-import spacy
 import os
 import ffmpeg
 import easyocr
 import os
+from collections import Counter
 import re
 from utils.utils import *
 
@@ -94,35 +94,32 @@ def extract_text_from_frames(reader, frame_folder, video_time):
         return video_frame_text
 
 
+def clean_text_list(text_list):
+    return text_list
+
 def generate_input_text(video_description, video_audio, video_frame_text):
-    generated_texts = video_description , video_audio ,  " ".join(video_frame_text)
-    print( generated_texts)
+
+    video_frame_text = " ".join(video_frame_text)
+    print(f"""
+
+
+            video description : {video_description}
+
+
+
+            video audio : {video_audio}
+
+
+
+            video_frame_text : {video_frame_text}
+
+
+
+          """)
+    generated_texts = video_description  + "\n" + video_audio + "\n" + video_frame_text
+    print(generated_texts)
     return generated_texts
 
-
-def forecast_places(input_generated_texts):
-    nlp = spacy.load("xx_ent_wiki_sm")
-    doc = nlp(str(input_generated_texts))
-    forecasted_places = [ent.text for ent in doc.ents if ent.label_  in ["LOC"]]
-    print("forecasted places :", forecasted_places)
-    return forecasted_places
-
-
-def check_audio(audio_file_name): 
-    try:
-        with open(audio_file_name, 'rb') as audio_file:
-            mp3_file_content_to_recognize = audio_file.read()
-        
-            shazam = Shazam(mp3_file_content_to_recognize)
-            recognize_generator = shazam.recognizeSong()
-            if True:
-                print("Identified music.")
-                return False
-    except FileNotFoundError:
-        print("No music")
-    except Exception as e:
-        print(f"Error append: {e}")
-    return False
 
 
 def clean_text(text):
@@ -153,8 +150,7 @@ def preprocess_text(text):
 
 def forecast_tiktok_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client, supabase):
     download_tiktok_audio(video_url, f"{RAW_DATA_FOLDER}/audio")
-    is_music = check_audio(f"{RAW_DATA_FOLDER}/audio.mp3")
-    video_audio = transcript_audio_to_text(f"{RAW_DATA_FOLDER}/audio.mp3", is_music)
+    video_audio = transcript_audio_to_text(f"{RAW_DATA_FOLDER}/audio.mp3", False)
     get_tiktok_metadata(video_url, f"{RAW_DATA_FOLDER}/video_metadata.csv")
     video_title, video_description, video_time = extract_metadata(f"{RAW_DATA_FOLDER}/video_metadata.csv")
     print(f"video time : {video_time} seconds")
@@ -163,15 +159,11 @@ def forecast_tiktok_places(video_url, RAW_DATA_FOLDER, FRAME_FOLDER, gpt_client,
     reader = create_reader()
     video_frame_text = extract_text_from_frames(reader, frame_folder=FRAME_FOLDER, video_time=video_time)
     input_text = generate_input_text(video_description, video_audio, video_frame_text)
-    cleaned_text = clean_text(str(input_text))
-    new = remove_duplicates(cleaned_text)
-    new = preprocess_text(new)
-    print("preprocessed text : " + new)
     output = nlp_forecast(gpt_client, str(input_text))
     dico = eval(output)
     data = pd.DataFrame(dico, index=[0])
     print(data.head())
-    upload_raw_to_supabase(video_url, video_description, video_frame_text, video_audio, new, data, supabase, int(data["place_number"]))
+    upload_raw_to_supabase(video_url, video_description, video_frame_text, video_audio, input_text, data, supabase, int(data["place_number"]))
     return data
 
 

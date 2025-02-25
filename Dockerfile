@@ -1,12 +1,13 @@
 ARG PYTHON_VERSION=3.12.6
 FROM python:${PYTHON_VERSION}-slim AS base
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /workspace
 
-RUN apt-get update && apt-get install -y \
+# Installer les dépendances système
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gnupg \
     gcc \
@@ -14,14 +15,18 @@ RUN apt-get update && apt-get install -y \
     make \
     ffmpeg \
     unzip \
-    --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+    libffi-dev \
+    build-essential \
+    python3-dev \
+    libc6-dev \
+    rustc \
+    cmake \
+    ninja-build && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN python -m pip install --no-cache-dir --upgrade pip && \
-    python -m pip install --no-cache-dir -r requirements.txt
 
-RUN python -m spacy download xx_ent_wiki_sm
+RUN python -m pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
