@@ -9,11 +9,9 @@ import glob
 
 def get_secret_value(key_name):
     client = boto3.client('secretsmanager', region_name='eu-west-3')
-
     secret_key = f"spotit-prod-{key_name}"
     response = client.get_secret_value(SecretId=secret_key)
     secret_dict = json.loads(response['SecretString'])
-
     return secret_dict
 
 def tiktok_or_instagram(url):
